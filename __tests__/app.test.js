@@ -3,6 +3,7 @@ const seed = require('../db/seeds/seed')
 const request = require('supertest')
 const connection = require('../db/connection')
 const data = require('../db/data/test-data')
+const description = require('../endpoints.json')
 
 afterAll(()=>{
     return connection.end()
@@ -26,7 +27,7 @@ describe('/api/topics', () => {
         })
     })
   })
-  test('GET: 400 - should respond with an error message saying not found when we try to access a non-existent url', () => {
+  test('GET: 404 - should respond with an error message saying not found when we try to access a non-existent url', () => {
     return request(app)
     .get('/api/wrong_url')
     .expect(404)
@@ -36,3 +37,15 @@ describe('/api/topics', () => {
     })
   })
 })
+
+describe('/api', () => {
+  test('should ', () => {
+    return request(app)
+    .get('/api')
+    .expect(200)
+    .then(({body}) => {
+        expect(body.description).toEqual(description)
+    })
+  })
+})
+
