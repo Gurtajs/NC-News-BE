@@ -6,8 +6,6 @@ function getTopics(req, res, next) {
     }).catch(next)
 }
 
-function getDescription(req, res, next) {
 
-}
 
 module.exports = {getTopics}
