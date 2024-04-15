@@ -1,4 +1,4 @@
-const {getTopicsData} = require('../models/models')
+const {getTopicsData} = require('../models/topics-models')
 const description = require('../endpoints.json')
 function getTopics(req, res, next) {
     getTopicsData().then((topics) => {
