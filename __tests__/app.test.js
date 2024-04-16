@@ -68,21 +68,65 @@ describe("/api/articles/:article_id", () => {
         );
       });
   });
-  test('GET: 404 - sends an appropriate status and error mesage when given a valid but non-existent id', () => {
+  test("GET: 404 - sends an appropriate status and error mesage when given a valid but non-existent id", () => {
     return request(app)
-    .get('/api/articles/99999')
-    .expect(404)
-    .then(({body}) => {
-        expect(body.message).toBe('Not found')
-    })
-  })
+      .get("/api/articles/99999")
+      .expect(404)
+      .then(({ body }) => {
+        expect(body.message).toBe("Not found");
+      });
+  });
 
-  test('GET: 400 - sends an appropriate status and error message when given an invalid id', () => {
+  test("GET: 400 - sends an appropriate status and error message when given an invalid id", () => {
     return request(app)
-    .get('/api/articles/thisarticle')
-    .expect(400)
+      .get("/api/articles/thisarticle")
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.message).toBe("Bad request");
+      });
+  });
+});
+
+describe("/api/articles", () => {
+  test("GET: 200 - should respond with an appropriate status code and should return all articles ", () => {
+    return request(app)
+      .get("/api/articles")
+      .expect(200)
+      .then(({ body }) => {
+        const articles = body.articles;
+        expect(articles.length).toBe(13);
+        
+        articles.forEach((article) => {
+          expect(Object.keys(article).length).toBe(8)
+          expect(typeof article.author).toBe("string");
+          expect(typeof article.title).toBe("string");
+          expect(typeof article.article_id).toBe("number");
+          expect(typeof article.topic).toBe("string");
+          expect(typeof article.created_at).toBe("string");
+          expect(typeof article.votes).toBe("number");
+          expect(typeof article.article_img_url).toBe("string");
+          expect(typeof article.comment_count).toBe("number");
+        });
+      });
+  });
+
+  test('should sort the articles by date in descending order', () => {
+    return request(app)
+    .get("/api/articles")
+    .expect(200)
     .then(({body}) => {
-        expect(body.message).toBe('Bad request')
+      const articles = body.articles
+      expect(articles).toBeSortedBy('created_at', {
+        descending: true,
+      })
     })
   })
+  test('GET: 404 - responds with an error message when given an invalid endpoint', () => {
+    return request(app)
+    .get("/api/articlesss")
+    .expect(404)
+    .then((body) => {
+      expect(body.res.statusMessage).toBe("Not Found")
+  })
+})
 });
