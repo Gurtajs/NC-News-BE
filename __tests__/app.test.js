@@ -95,9 +95,9 @@ describe("/api/articles", () => {
       .then(({ body }) => {
         const articles = body.articles;
         expect(articles.length).toBe(13);
-        
+
         articles.forEach((article) => {
-          expect(Object.keys(article).length).toBe(8)
+          expect(Object.keys(article).length).toBe(8);
           expect(typeof article.author).toBe("string");
           expect(typeof article.title).toBe("string");
           expect(typeof article.article_id).toBe("number");
@@ -110,23 +110,73 @@ describe("/api/articles", () => {
       });
   });
 
-  test('should sort the articles by date in descending order', () => {
+  test("should sort the articles by date in descending order", () => {
     return request(app)
-    .get("/api/articles")
+      .get("/api/articles")
+      .expect(200)
+      .then(({ body }) => {
+        const articles = body.articles;
+        expect(articles).toBeSortedBy("created_at", {
+          descending: true,
+        });
+      });
+  });
+  test("GET: 404 - responds with an error message when given an invalid endpoint", () => {
+    return request(app)
+      .get("/api/articlesss")
+      .expect(404)
+      .then((body) => {
+        expect(body.res.statusMessage).toBe("Not Found");
+      });
+  });
+});
+
+describe("/api/articles/:article_id/comments", () => {
+  test("GET: 200 - should return the comments for the specified article id", () => {
+    return request(app)
+      .get("/api/articles/1/comments")
+      .expect(200)
+      .then(({body}) => {
+        const comments = body.comments
+        expect(comments.length).toBe(11)
+        comments.forEach((comment) => {
+          expect(typeof comment.comment_id).toBe('number')
+          expect(typeof comment.votes).toBe('number')
+          expect(typeof comment.created_at).toBe('string')
+          expect(typeof comment.author).toBe('string')
+          expect(typeof comment.body).toBe('string')
+          expect(typeof comment.article_id).toBe('number')
+        })
+      });
+  });
+  
+  test('GET: 200 - the most recent comments should be displayed first', () => {
+    return request(app)
+    .get("/api/articles/1/comments")
     .expect(200)
     .then(({body}) => {
-      const articles = body.articles
-      expect(articles).toBeSortedBy('created_at', {
+      const comments = body.comments
+      expect(comments).toBeSortedBy('created_at', {
         descending: true,
       })
     })
   })
-  test('GET: 404 - responds with an error message when given an invalid endpoint', () => {
+  test('GET: 404 - should return an error message when given a valid but non-existent article id', () => {
     return request(app)
-    .get("/api/articlesss")
+    .get("/api/articles/999/comments")
     .expect(404)
-    .then((body) => {
-      expect(body.res.statusMessage).toBe("Not Found")
+    .then(({body}) => {
+      expect(body.message).toBe("Article not found")
+    })
   })
-})
+  test('GET: 400 - should return an error message when given an invalid article id', () => {
+    return request(app) 
+    .get("/api/articles/invalid/comments")
+    .expect(400)
+    .then(({body}) => {
+      expect(body.message).toBe("Bad request")
+    })
+  })
+  
+  
 });

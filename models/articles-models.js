@@ -22,4 +22,4 @@ function getAllArticlesData(sort_by = 'created_at', order='desc') {
     })
 }
 
-module.exports = { getArticleData, getAllArticlesData };
+module.exports = { getArticleData, getAllArticlesData};
