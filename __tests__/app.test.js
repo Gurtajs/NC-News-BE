@@ -136,47 +136,94 @@ describe("/api/articles/:article_id/comments", () => {
     return request(app)
       .get("/api/articles/1/comments")
       .expect(200)
-      .then(({body}) => {
-        const comments = body.comments
-        expect(comments.length).toBe(11)
+      .then(({ body }) => {
+        const comments = body.comments;
+        expect(comments.length).toBe(11);
         comments.forEach((comment) => {
-          expect(typeof comment.comment_id).toBe('number')
-          expect(typeof comment.votes).toBe('number')
-          expect(typeof comment.created_at).toBe('string')
-          expect(typeof comment.author).toBe('string')
-          expect(typeof comment.body).toBe('string')
-          expect(typeof comment.article_id).toBe('number')
-        })
+          expect(typeof comment.comment_id).toBe("number");
+          expect(typeof comment.votes).toBe("number");
+          expect(typeof comment.created_at).toBe("string");
+          expect(typeof comment.author).toBe("string");
+          expect(typeof comment.body).toBe("string");
+          expect(typeof comment.article_id).toBe("number");
+        });
       });
   });
-  
-  test('GET: 200 - the most recent comments should be displayed first', () => {
+
+  test("GET: 200 - the most recent comments should be displayed first", () => {
     return request(app)
-    .get("/api/articles/1/comments")
-    .expect(200)
-    .then(({body}) => {
-      const comments = body.comments
-      expect(comments).toBeSortedBy('created_at', {
-        descending: true,
-      })
-    })
-  })
-  test('GET: 404 - should return an error message when given a valid but non-existent article id', () => {
+      .get("/api/articles/1/comments")
+      .expect(200)
+      .then(({ body }) => {
+        const comments = body.comments;
+        expect(comments).toBeSortedBy("created_at", {
+          descending: true,
+        });
+      });
+  });
+  test("GET: 404 - should return an error message when given a valid but non-existent article id", () => {
     return request(app)
-    .get("/api/articles/999/comments")
-    .expect(404)
-    .then(({body}) => {
-      expect(body.message).toBe("Article not found")
-    })
-  })
-  test('GET: 400 - should return an error message when given an invalid article id', () => {
-    return request(app) 
-    .get("/api/articles/invalid/comments")
-    .expect(400)
-    .then(({body}) => {
-      expect(body.message).toBe("Bad request")
-    })
-  })
-  
-  
+      .get("/api/articles/999/comments")
+      .expect(404)
+      .then(({ body }) => {
+        expect(body.message).toBe("Article not found");
+      });
+  });
+  test("GET: 400 - should return an error message when given an invalid article id", () => {
+    return request(app)
+      .get("/api/articles/invalid/comments")
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.message).toBe("Bad request");
+      });
+  });
+});
+
+describe("/api/articles/:article_id/comments", () => {
+  test("POST: 201 - should post a comment for the given article id", () => {
+    const comment = {
+      username: "Gurtaj",
+      body: "Oh, I've got compassion running out of my nose, pal! I'm the Sultan of Sentiment!",
+    };
+    return request(app)
+      .post("/api/articles/2/comments")
+      .send(comment)
+      .expect(201)
+      .then(({ body }) => {
+        expect(body.comment).toMatchObject({
+          body: "Oh, I've got compassion running out of my nose, pal! I'm the Sultan of Sentiment!",
+          votes: 0,
+          author: "Gurtaj",
+          article_id: 2,
+        });
+        expect(typeof body.comment.created_at).toEqual("string");
+      });
+  });
+  test("POST: 400 - should return an error message when client posts a comment with incorrect keys", () => {
+    const comment = {
+      username: "Gurtajs",
+      body: "Oh, I've got compassion running out of my nose, pal! I'm the Sultan of Sentiment!",
+      age: 25,
+    };
+    return request(app)
+      .post("/api/articles/2/comments")
+      .send(comment)
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.message).toBe("Bad request: non-existent fields passed in");
+      });
+  });
+  test("POST: 404 - should return an error message when client posts a comment to a non-existent article", () => {
+    const comment = {
+      username: "Gurtajs",
+      body: "Oh, I've got compassion running out of my nose, pal! I'm the Sultan of Sentiment!",
+    };
+    return request(app)
+      .post("/api/articles/999/comments")
+      .send(comment)
+      .expect(404)
+      .then(({ body }) => {
+        expect(body.message).toBe("Bad request: article not found");
+      });
+  });
 });
