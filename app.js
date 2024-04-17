@@ -13,6 +13,8 @@ const {
   deleteComment,
 } = require("./controllers/comments-controller");
 
+const {getUsers} = require("./controllers/users-controller")
+
 app.use(express.json());
 
 app.get("/api/topics", getTopics);
@@ -32,6 +34,8 @@ app.post("/api/articles/:article_id/comments", postComment);
 app.patch("/api/articles/:article_id", patchArticle);
 
 app.delete("/api/comments/:comment_id", deleteComment);
+
+app.get('/api/users', getUsers)
 
 app.use((err, req, res, next) => {
   if (err.code === "23503") {

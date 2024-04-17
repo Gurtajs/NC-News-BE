@@ -322,3 +322,28 @@ describe("/api/comments/:comment_id", () => {
       });
   });
 });
+describe('/api/users', () => {
+  test('GET: 200 - should return all users', () => {
+    return request(app)
+    .get('/api/users')
+    .expect(200)
+    .then(({body}) => {
+      const users = body.users
+      expect(users.length).toBe(4)
+      users.forEach((user) => {
+        expect(typeof user.username).toBe('string')
+        expect(typeof user.name).toBe('string')
+        expect(typeof user.avatar_url).toBe('string')
+      })
+    })
+  })
+  test('GET: 404 - should return an error message when we access the wrong url', () => {
+    return request(app)
+    .get('/api/usersss')
+    .expect(404)
+    .then((body) => {
+      expect(body.res.statusMessage).toBe("Not Found");
+    })
+  })
+})
+
