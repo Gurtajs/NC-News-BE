@@ -46,4 +46,21 @@ function postCommentData(comment, article_id) {
   }
 }
 
-module.exports = { getCommentsData, addUsernameData, postCommentData };
+function deleteCommentData(comment_id) {
+  return db
+    .query("DELETE FROM comments WHERE comment_id = $1 RETURNING *", [
+      comment_id,
+    ])
+    .then((comment) => {
+      if (comment.rows.length === 0) {
+        return Promise.reject({ status: 404, message: "Comment not found" });
+      }
+    });
+}
+
+module.exports = {
+  getCommentsData,
+  addUsernameData,
+  postCommentData,
+  deleteCommentData,
+};

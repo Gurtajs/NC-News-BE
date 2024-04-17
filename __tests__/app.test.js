@@ -273,31 +273,52 @@ describe("/api/articles/:article_id", () => {
         expect(typeof body.article.created_at).toBe("string");
       });
   });
-  test('PATCH: 400 - should return an error message when we patch a property that does not exist in the article', () => {
+  test("PATCH: 400 - should return an error message when we patch a property that does not exist in the article", () => {
     const age = {
       age: 25,
     };
     return request(app)
-    .patch("/api/articles/1")
-    .send(age)
-    .expect(400)
-    .then(({body}) => {
-      expect(body.message).toBe('Bad request: property does not exist')
-    })
-  })
+      .patch("/api/articles/1")
+      .send(age)
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.message).toBe("Bad request: property does not exist");
+      });
+  });
 
-  test('PATCH: 404 - should return an error message when we patch an article that does not exist', () => {
+  test("PATCH: 404 - should return an error message when we patch an article that does not exist", () => {
     const votes = {
       inc_votes: -100,
     };
     return request(app)
-    .patch("/api/articles/999")
-    .send(votes)
-    .expect(404)
-    .then(({body}) => {
-      expect(body.message).toBe('Not found')
-    })
-  })
+      .patch("/api/articles/999")
+      .send(votes)
+      .expect(404)
+      .then(({ body }) => {
+        expect(body.message).toBe("Not found");
+      });
+  });
 });
 
+describe("/api/comments/:comment_id", () => {
+  test("DELETE: 204 - should delete the given comment by comment id", () => {
+    return request(app).delete("/api/comments/3").expect(204);
+  });
 
+  test("DELETE: 404 - should return an error message when we attempt to delete a comment with a valid but non existent id", () => {
+    return request(app)
+      .delete("/api/comments/999")
+      .expect(404)
+      .then(({ body }) => {
+        expect(body.message).toBe("Comment not found");
+      });
+  });
+  test("DELETE 400 - should return an error message when we attempt to delete a comment when given an invalid id", () => {
+    return request(app)
+      .delete("/api/comments/invalid")
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.message).toBe("Bad request");
+      });
+  });
+});
