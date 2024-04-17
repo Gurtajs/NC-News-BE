@@ -223,7 +223,81 @@ describe("/api/articles/:article_id/comments", () => {
       .send(comment)
       .expect(404)
       .then(({ body }) => {
-        expect(body.message).toBe("Bad request: article not found");
+        expect(body.message).toBe("Article not found");
       });
   });
 });
+
+describe("/api/articles/:article_id", () => {
+  test("PATCH: 200 - should return a patched article by article_id when votes are being incremented", () => {
+    const votes = {
+      inc_votes: 1,
+    };
+    return request(app)
+      .patch("/api/articles/1")
+      .send(votes)
+      .expect(200)
+      .then(({ body }) => {
+        expect(body.article).toMatchObject({
+          article_id: 1,
+          title: "Living in the shadow of a great man",
+          topic: "mitch",
+          author: "butter_bridge",
+          body: "I find this existence challenging",
+          votes: 101,
+          article_img_url:
+            "https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700",
+        });
+        expect(typeof body.article.created_at).toBe("string");
+      });
+  });
+  test("PATCH: 200 - should return a patched article by article_id when votes are being decremented", () => {
+    const votes = {
+      inc_votes: -100,
+    };
+    return request(app)
+      .patch("/api/articles/1")
+      .send(votes)
+      .expect(200)
+      .then(({ body }) => {
+        expect(body.article).toMatchObject({
+          article_id: 1,
+          title: "Living in the shadow of a great man",
+          topic: "mitch",
+          author: "butter_bridge",
+          body: "I find this existence challenging",
+          votes: 0,
+          article_img_url:
+            "https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700",
+        });
+        expect(typeof body.article.created_at).toBe("string");
+      });
+  });
+  test('PATCH: 400 - should return an error message when we patch a property that does not exist in the article', () => {
+    const age = {
+      age: 25,
+    };
+    return request(app)
+    .patch("/api/articles/1")
+    .send(age)
+    .expect(400)
+    .then(({body}) => {
+      expect(body.message).toBe('Bad request: property does not exist')
+    })
+  })
+
+  test('PATCH: 404 - should return an error message when we patch an article that does not exist', () => {
+    const votes = {
+      inc_votes: -100,
+    };
+    return request(app)
+    .patch("/api/articles/999")
+    .send(votes)
+    .expect(404)
+    .then(({body}) => {
+      expect(body.message).toBe('Not found')
+    })
+  })
+});
+
+

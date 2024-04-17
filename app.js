@@ -5,6 +5,7 @@ const description = require("./endpoints.json");
 const {
   getArticle,
   getAllArticles,
+  patchArticle,
 } = require("./controllers/articles-controller");
 const {
   getComments,
@@ -27,9 +28,11 @@ app.get("/api/articles/:article_id/comments", getComments);
 
 app.post("/api/articles/:article_id/comments", postComment);
 
+app.patch("/api/articles/:article_id", patchArticle)
+
 app.use((err, req, res, next) => {
   if (err.code === "23503") {
-    res.status(404).send({ message: "Bad request: article not found" });
+    res.status(404).send({ message: "Article not found" });
   }
   if (err.status && err.message) {
     res.status(err.status).send({ message: err.message });
