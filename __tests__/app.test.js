@@ -322,28 +322,58 @@ describe("/api/comments/:comment_id", () => {
       });
   });
 });
-describe('/api/users', () => {
-  test('GET: 200 - should return all users', () => {
+describe("/api/users", () => {
+  test("GET: 200 - should return all users", () => {
     return request(app)
-    .get('/api/users')
-    .expect(200)
-    .then(({body}) => {
-      const users = body.users
-      expect(users.length).toBe(4)
-      users.forEach((user) => {
-        expect(typeof user.username).toBe('string')
-        expect(typeof user.name).toBe('string')
-        expect(typeof user.avatar_url).toBe('string')
-      })
-    })
-  })
-  test('GET: 404 - should return an error message when we access the wrong url', () => {
+      .get("/api/users")
+      .expect(200)
+      .then(({ body }) => {
+        const users = body.users;
+        expect(users.length).toBe(4);
+        users.forEach((user) => {
+          expect(typeof user.username).toBe("string");
+          expect(typeof user.name).toBe("string");
+          expect(typeof user.avatar_url).toBe("string");
+        });
+      });
+  });
+  test("GET: 404 - should return an error message when we access the wrong url", () => {
     return request(app)
-    .get('/api/usersss')
-    .expect(404)
-    .then((body) => {
-      expect(body.res.statusMessage).toBe("Not Found");
-    })
-  })
-})
+      .get("/api/usersss")
+      .expect(404)
+      .then((body) => {
+        expect(body.res.statusMessage).toBe("Not Found");
+      });
+  });
+});
 
+describe("/api/articles?topic=cats", () => {
+  test("GET: 200 - should return an article by topic", () => {
+    return request(app)
+      .get("/api/articles?topic=cats")
+      .expect(200)
+      .then(({ body }) => {
+        const articles = body.articles;
+        expect(articles.length).toBe(1);
+        articles.forEach((article) => {
+          expect(article.topic).toBe("cats");
+        });
+      });
+  });
+  test('GET: 404 - should return an error message when we pass a non-existent but valid topic', () => {
+    return request(app)
+    .get("/api/articles?topic=nonexistent")
+    .expect(404)
+    .then(({body}) => {
+      expect(body.message).toBe("Not found")
+    })
+  })
+  test('GET: 400 - should return an error message when we pass an invalid topic', () => {
+    return request(app)
+    .get("/api/articles?topic=d23")
+    .expect(400)
+    .then(({body}) => {
+      expect(body.message).toBe("Bad request")
+    })
+  })
+});

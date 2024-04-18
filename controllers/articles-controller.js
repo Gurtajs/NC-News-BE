@@ -1,4 +1,4 @@
-const { getArticleData, getAllArticlesData, patchArticleData } = require("../models/articles-models");
+const { getArticleData, getAllArticlesData, patchArticleData, getAllArticlesByTopic } = require("../models/articles-models");
 
 function getArticle(req, res, next) {
   const { article_id } = req.params;
@@ -8,9 +8,16 @@ function getArticle(req, res, next) {
 }
 
 function getAllArticles(req, res, next) {
-	getAllArticlesData().then((articles) => {
-		res.status(200).send({articles})
-	}).catch(next)
+  const {topic} = req.query
+  if (topic) {
+    getAllArticlesByTopic(topic).then((articles) => {
+      res.status(200).send({articles})
+    }).catch(next)
+  } else {
+    getAllArticlesData().then((articles) => {
+      res.status(200).send({articles})
+    }).catch(next)
+  }
 }
 
 function patchArticle(req, res, next) {
