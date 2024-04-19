@@ -24,7 +24,7 @@ lint:
     name: Use PostgreSQL
     uses: harmon758/postgresql-action@v1
     with:
-      postgresql db: nc_news
+      postgresql db: nc_news_test
       postgresql user: gurtaj
       postgresql password: 123456
 
