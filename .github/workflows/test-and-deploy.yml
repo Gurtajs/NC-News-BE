@@ -2,7 +2,7 @@ name: Test & Deploy
 on:
   push:
     branches: 
-      -main
+    - main
 
 jobs:
   test:
@@ -30,7 +30,7 @@ jobs:
     - name: Run tests
       run: PGDATABASE=nc_news_test PGUSER=gurtaj PGPASSWORD=123456 npm t
   
- deploy:
+deploy:
     runs-on: ubuntu-latest
     needs: test # wait until test is successful before running this job
     steps:
