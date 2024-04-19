@@ -9,30 +9,30 @@ jobs:
     name: Test
     runs-on: ubuntu-latest
     steps:
-    - name: Checkout Repo
-      uses: actions/checkout@v3
+      - name: Checkout Repo
+        uses: actions/checkout@v3
 
-    - name: Use Node.js
-      uses: actions/setup-node@v3
-      with:
-        node-version: 18
+      - name: Use Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
 
-    - name: Use PostgreSQL
-      uses: harmon758/postgresql-action@v1
-      with:
-        postgresql db: nc_news_test
-        postgresql user: gurtaj
-        postgresql password: 123456
+      - name: Use PostgreSQL
+        uses: harmon758/postgresql-action@v1
+        with:
+          postgresql db: nc_news_test
+          postgresql user: gurtaj
+          postgresql password: 123456
 
-    - name: Install dependencies
-      run: npm ci
+      - name: Install dependencies
+        run: npm ci
 
-    - name: Run tests
-      run: PGDATABASE=nc_news_test PGUSER=gurtaj PGPASSWORD=123456 npm t
+      - name: Run tests
+        run: PGDATABASE=nc_news_test PGUSER=gurtaj PGPASSWORD=123456 npm t
   
 deploy:
-    runs-on: ubuntu-latest
-    needs: test # wait until test is successful before running this job
-    steps:
-      - name: Deploy to Render
-        run: curl ${{ secrets.RENDER_DEPLOY_HOOK_URL }}
+  runs-on: ubuntu-latest
+  needs: test # wait until test is successful before running this job
+  steps:
+    - name: Deploy to Render
+      run: curl ${{ secrets.RENDER_DEPLOY_HOOK_URL }}
