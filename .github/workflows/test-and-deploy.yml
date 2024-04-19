@@ -13,25 +13,25 @@ lint:
   name: Lint
   runs-on: ubuntu-latest
   steps:
-      name: Checkout Repo
+    - name: Checkout Repo
       uses: actions/checkout@v3
 
-    name: Use Node.js
+    - name: Use Node.js
     uses: actions/setup-node@v3
     with:
       node-version: 21
 
-    name: Use PostgreSQL
+    - name: Use PostgreSQL
     uses: harmon758/postgresql-action@v1
     with:
       postgresql db: nc_news_test
       postgresql user: gurtaj
       postgresql password: 123456
 
-    name: Install dependencies
+    - name: Install dependencies
     run: npm ci
 
-    name: Run tests
+    - name: Run tests
     run: PGDATABASE=my_db PGUSER=test_user PGPASSWORD=test_password npm t
 
  deploy:
