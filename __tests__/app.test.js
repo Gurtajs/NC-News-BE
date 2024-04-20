@@ -55,9 +55,7 @@ describe("/api/articles/:article_id", () => {
       .get("/api/articles/1")
       .expect(200)
       .then(({ body }) => {
-        
         const article = body.article;
-        console.log(body)
         expect(article.author).toBe("butter_bridge");
         expect(article.title).toBe("Living in the shadow of a great man");
         expect(article.article_id).toBe(1);
@@ -100,15 +98,20 @@ describe("/api/articles", () => {
 
         articles.forEach((article) => {
           expect(Object.keys(article).length).toBe(8);
-          expect(typeof article.author).toBe("string");
-          expect(typeof article.title).toBe("string");
-          expect(typeof article.article_id).toBe("number");
-          expect(typeof article.topic).toBe("string");
-          expect(typeof article.created_at).toBe("string");
-          expect(typeof article.votes).toBe("number");
-          expect(typeof article.article_img_url).toBe("string");
-          expect(typeof article.comment_count).toBe("number");
-        });
+          expect(article).toEqual(
+            expect.objectContaining({
+              author: expect.any(String),
+              title: expect.any(String),
+              article_id: expect.any(Number),
+              topic: expect.any(String),
+              created_at: expect.any(String),
+              votes: expect.any(Number),
+              article_img_url: expect.any(String),
+              comment_count: expect.any(Number),
+            })
+          );
+          expect(article).not.toEqual(expect.objectContaining({body: expect.any(String)}))
+          })
       });
   });
 
@@ -147,7 +150,7 @@ describe("/api/articles/:article_id/comments", () => {
           expect(typeof comment.created_at).toBe("string");
           expect(typeof comment.author).toBe("string");
           expect(typeof comment.body).toBe("string");
-          expect(typeof comment.article_id).toBe("number");
+          expect(comment.article_id).toBe(1);
         });
       });
   });
@@ -163,6 +166,15 @@ describe("/api/articles/:article_id/comments", () => {
         });
       });
   });
+  test('GET: 200 - should return an empty array if there are no comments associated with the given article id', () => {
+    return request(app)
+    .get("/api/articles/2/comments")
+    .expect(200)
+    .then(({body}) => {
+      const comments = body.comments
+      expect(comments).toEqual([])
+    })
+  })
   test("GET: 404 - should return an error message when given a valid but non-existent article id", () => {
     return request(app)
       .get("/api/articles/999/comments")
@@ -184,7 +196,7 @@ describe("/api/articles/:article_id/comments", () => {
 describe("/api/articles/:article_id/comments", () => {
   test("POST: 201 - should post a comment for the given article id", () => {
     const comment = {
-      username: "Gurtaj",
+      username: "butter_bridge",
       body: "Oh, I've got compassion running out of my nose, pal! I'm the Sultan of Sentiment!",
     };
     return request(app)
@@ -195,26 +207,38 @@ describe("/api/articles/:article_id/comments", () => {
         expect(body.comment).toMatchObject({
           body: "Oh, I've got compassion running out of my nose, pal! I'm the Sultan of Sentiment!",
           votes: 0,
-          author: "Gurtaj",
+          author: "butter_bridge",
           article_id: 2,
         });
         expect(typeof body.comment.created_at).toEqual("string");
       });
   });
-  test("POST: 400 - should return an error message when client posts a comment with incorrect keys", () => {
+  test("POST: 400 - should return an error message when client posts a comment with incomplete body", () => {
     const comment = {
-      username: "Gurtajs",
-      body: "Oh, I've got compassion running out of my nose, pal! I'm the Sultan of Sentiment!",
-      age: 25,
+      username: "butter_bridge",
     };
     return request(app)
       .post("/api/articles/2/comments")
       .send(comment)
       .expect(400)
       .then(({ body }) => {
-        expect(body.message).toBe("Bad request: non-existent fields passed in");
+        expect(body.message).toBe("Bad request: incomplete body");
       });
   });
+
+  test("POST: 404 - should return an error message when the username does not exist", () => {
+    const comment = {
+      username: "Gurtaj",
+      body: "Oh, I've got compassion running out of my nose, pal! I'm the Sultan of Sentiment!",
+    }
+    return request(app)
+    .post("/api/articles/2/comments")
+    .send(comment)
+    .expect(404)
+    .then(({body}) => {
+      expect(body.message).toBe("Not found")
+    })
+  })
   test("POST: 404 - should return an error message when client posts a comment to a non-existent article", () => {
     const comment = {
       username: "Gurtajs",
@@ -225,7 +249,7 @@ describe("/api/articles/:article_id/comments", () => {
       .send(comment)
       .expect(404)
       .then(({ body }) => {
-        expect(body.message).toBe("Article not found");
+        expect(body.message).toBe("Not found");
       });
   });
 });
@@ -362,42 +386,42 @@ describe("/api/articles?topic=cats", () => {
         });
       });
   });
-  test('GET: 404 - should return an error message when we pass a non-existent but valid topic', () => {
+  test("GET: 404 - should return an error message when we pass a non-existent but valid topic", () => {
     return request(app)
-    .get("/api/articles?topic=nonexistent")
-    .expect(404)
-    .then(({body}) => {
-      expect(body.message).toBe("Not found")
-    })
-  })
-  test('GET: 400 - should return an error message when we pass an invalid topic', () => {
+      .get("/api/articles?topic=nonexistent")
+      .expect(404)
+      .then(({ body }) => {
+        expect(body.message).toBe("Not found");
+      });
+  });
+  test("GET: 400 - should return an error message when we pass an invalid topic", () => {
     return request(app)
-    .get("/api/articles?topic=d23")
-    .expect(400)
-    .then(({body}) => {
-      expect(body.message).toBe("Bad request")
-    })
-  })
+      .get("/api/articles?topic=d23")
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.message).toBe("Bad request");
+      });
+  });
 });
 
-describe('/api/articles/:article_id', () => {
-  test('should return an article object by article_id which should also include comment_count', () => {
+describe("/api/articles/:article_id", () => {
+  test("should return an article object by article_id which should also include comment_count", () => {
     return request(app)
-    .get("/api/articles/1")
-    .expect(200)
-    .then(({body}) => {
-      expect(body.article).toEqual({
-        article_id: 1,
-        title: "Living in the shadow of a great man",
-        topic: "mitch",
-        author: "butter_bridge",
-        body: "I find this existence challenging",
-        created_at: '2020-07-09T21:11:00.000Z',
-        votes: 100,
-        article_img_url:
-          "https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700",
-        comment_count: 11,
-      })
-    })
-  })
-})
+      .get("/api/articles/1")
+      .expect(200)
+      .then(({ body }) => {
+        expect(body.article).toEqual({
+          article_id: 1,
+          title: "Living in the shadow of a great man",
+          topic: "mitch",
+          author: "butter_bridge",
+          body: "I find this existence challenging",
+          created_at: "2020-07-09T21:11:00.000Z",
+          votes: 100,
+          article_img_url:
+            "https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700",
+          comment_count: 11,
+        });
+      });
+  });
+});

@@ -39,7 +39,7 @@ app.get('/api/users', getUsers)
 
 app.use((err, req, res, next) => {
   if (err.code === "23503") {
-    res.status(404).send({ message: "Article not found" });
+    res.status(404).send({ message: "Not found" });
   }
   if (err.status && err.message) {
     res.status(err.status).send({ message: err.message });
