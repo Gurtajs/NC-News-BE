@@ -54,7 +54,7 @@ function patchArticleData(article_id, inc_votes) {
   if (!inc_votes) {
     return Promise.reject({
       status: 400,
-      message: "Bad request: property does not exist",
+      message: "Bad request: property not modifiable",
     });
   }
   return db

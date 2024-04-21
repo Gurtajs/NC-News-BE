@@ -4,7 +4,7 @@
 Created a backend news API with different endpoints which is available to view on https://news-project-1.onrender.com/api.
 
 # Summary 
-The project is a backend news API that has endpoints that we can access to view the data for a given endpoint. This API will feed the front end, providing it with the information contained in the API. 
+The project is a backend news API that has endpoints that we can access to view the data for a given endpoint. This API will feed the front end, providing it with the information contained in the API.
 
 # Set up instructions
 1. Clone the following github repository URL https://github.com/Gurtajs/News-project by running git clone https://github.com/<github username>/News-project.git

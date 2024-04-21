@@ -68,6 +68,18 @@ describe("/api/articles/:article_id", () => {
         );
       });
   });
+
+  test("GET: 200 - should return an article object by article_id which should also include comment_count", () => {
+    return request(app)
+      .get("/api/articles/1")
+      .expect(200)
+      .then(({ body }) => {
+        expect(body.article).toMatchObject({
+          comment_count: 11,
+        });
+      });
+  });
+
   test("GET: 404 - sends an appropriate status and error mesage when given a valid but non-existent id", () => {
     return request(app)
       .get("/api/articles/99999")
@@ -299,7 +311,7 @@ describe("/api/articles/:article_id", () => {
         expect(typeof body.article.created_at).toBe("string");
       });
   });
-  test("PATCH: 400 - should return an error message when we patch a property that does not exist in the article", () => {
+  test("PATCH: 400 - should return an error message when we patch a property in the article other than vote", () => {
     const age = {
       age: 25,
     };
@@ -308,10 +320,9 @@ describe("/api/articles/:article_id", () => {
       .send(age)
       .expect(400)
       .then(({ body }) => {
-        expect(body.message).toBe("Bad request: property does not exist");
+        expect(body.message).toBe("Bad request: property not modifiable");
       });
   });
-
   test("PATCH: 404 - should return an error message when we patch an article that does not exist", () => {
     const votes = {
       inc_votes: -100,
@@ -324,6 +335,18 @@ describe("/api/articles/:article_id", () => {
         expect(body.message).toBe("Not found");
       });
   });
+  test('PATCH: 400 - should return an error message when we pass in an invalid article_id', () => {
+    const votes = {
+      inc_votes: -100,
+    };
+    return request(app)
+    .patch("/api/articles/invalid")
+    .send(votes)
+    .expect(400)
+    .then(({body}) => {
+      expect(body.message).toBe("Bad request")
+    })
+  })
 });
 
 describe("/api/comments/:comment_id", () => {
@@ -361,14 +384,6 @@ describe("/api/users", () => {
           expect(typeof user.name).toBe("string");
           expect(typeof user.avatar_url).toBe("string");
         });
-      });
-  });
-  test("GET: 404 - should return an error message when we access the wrong url", () => {
-    return request(app)
-      .get("/api/usersss")
-      .expect(404)
-      .then((body) => {
-        expect(body.res.statusMessage).toBe("Not Found");
       });
   });
 });
