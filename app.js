@@ -1,9 +1,8 @@
 const express = require("express");
 const app = express();
 const { getTopics } = require("./controllers/topics-controller");
-const description = require("./endpoints.json");
 const {
-  getArticle,
+  // getArticle,
   getAllArticles,
   patchArticle,
 } = require("./controllers/articles-controller");
@@ -17,25 +16,25 @@ const {getUsers} = require("./controllers/users-controller")
 
 app.use(express.json());
 
-app.get("/api/topics", getTopics);
+// app.get("/api/topics", getTopics);
 
-app.get("/api", (req, res, next) => {
-  res.status(200).send({ description });
-});
+const apiRouter = require('./routes/api-router')
+app.use("/api", apiRouter);
 
-app.get("/api/articles/:article_id", getArticle);
 
-app.get("/api/articles", getAllArticles);
+// app.get("/api/articles/:article_id", getArticle);
 
-app.get("/api/articles/:article_id/comments", getComments);
+// app.get("/api/articles", getAllArticles);
 
-app.post("/api/articles/:article_id/comments", postComment);
+// app.get("/api/articles/:article_id/comments", getComments);
 
-app.patch("/api/articles/:article_id", patchArticle);
+// app.post("/api/articles/:article_id/comments", postComment);
 
-app.delete("/api/comments/:comment_id", deleteComment);
+// app.patch("/api/articles/:article_id", patchArticle);
 
-app.get('/api/users', getUsers)
+// app.delete("/api/comments/:comment_id", deleteComment);
+
+// app.get('/api/users', getUsers)
 
 app.use((err, req, res, next) => {
   if (err.code === "23503") {
@@ -47,6 +46,7 @@ app.use((err, req, res, next) => {
   if (err.code === '22P02') {
     res.status(400).send({ message: "Bad request"})
   }
+  console.log(err)
 });
 
 module.exports = app;

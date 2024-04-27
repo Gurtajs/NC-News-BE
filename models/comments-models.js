@@ -1,10 +1,9 @@
 const db = require("../db/connection");
 const { articleData } = require("../db/data/test-data");
 
-
 function getCommentsData(article_id, sort_by = "created_at", order = "desc") {
-  if(article_id>articleData.length) {
-    return Promise.reject({status: 404, message:"Article not found"})
+  if (article_id > articleData.length) {
+    return Promise.reject({ status: 404, message: "Article not found" });
   }
   return db
     .query(
@@ -52,8 +51,29 @@ function deleteCommentData(comment_id) {
     });
 }
 
+function patchCommentData(comment_id, inc_votes) {
+  if (!inc_votes) {
+    return Promise.reject({
+      status: 400,
+      message: "Bad request: property not modifiable",
+    });
+  }
+  return db
+    .query(
+      "UPDATE comments SET votes = votes + $1 WHERE comment_id = $2 RETURNING *",
+      [inc_votes, comment_id]
+    )
+    .then((comment) => {
+      if (comment.rows.length === 0) {
+        return Promise.reject({ status: 404, message: "Not found" });
+      }
+      return comment.rows[0];
+    });
+}
+
 module.exports = {
   getCommentsData,
   postCommentData,
   deleteCommentData,
+  patchCommentData,
 };

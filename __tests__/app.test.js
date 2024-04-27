@@ -122,12 +122,13 @@ describe("/api/articles", () => {
               comment_count: expect.any(Number),
             })
           );
-          expect(article).not.toEqual(expect.objectContaining({body: expect.any(String)}))
-          })
+          expect(article).not.toEqual(
+            expect.objectContaining({ body: expect.any(String) })
+          );
+        });
       });
   });
-
-  test("should sort the articles by date in descending order", () => {
+  test("GET: 200 - should sort the articles by date in descending order", () => {
     return request(app)
       .get("/api/articles")
       .expect(200)
@@ -136,6 +137,47 @@ describe("/api/articles", () => {
         expect(articles).toBeSortedBy("created_at", {
           descending: true,
         });
+      });
+  });
+  test("GET: 200 - should sort the articles by the given column name and given order by", () => {
+    return request(app)
+      .get("/api/articles?sort_by=article_id&order_by=asc")
+      .expect(200)
+      .then(({ body }) => {
+        const articles = body.articles;
+        expect(articles).toBeSortedBy("article_id", {
+          ascending: true,
+        });
+      });
+  });
+  test("GET: 200 - should return articles by topic and sort the articles by the given column name and given order by", () => {
+    return request(app)
+      .get("/api/articles?topic=mitch&sort_by=author&order_by=asc")
+      .expect(200)
+      .then(({ body }) => {
+        const articles = body.articles;
+        expect(articles).toBeSortedBy("author", {
+          ascending: true,
+        });
+        articles.forEach((article) => {
+          expect(article).toMatchObject({ topic: "mitch" });
+        });
+      });
+  });
+  test("GET: 400 - responds with an error message when given an invalid sort_by", () => {
+    return request(app)
+      .get("/api/articles?sort_by=invalid&order_by=asc")
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.message).toBe("Bad request");
+      });
+  });
+  test("GET 400 - responds with an error message when given an invalid order_by", () => {
+    return request(app)
+      .get("/api/articles?sort_by=topic&order_by=invalid")
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.message).toBe("Bad request");
       });
   });
   test("GET: 404 - responds with an error message when given an invalid endpoint", () => {
@@ -178,15 +220,15 @@ describe("/api/articles/:article_id/comments", () => {
         });
       });
   });
-  test('GET: 200 - should return an empty array if there are no comments associated with the given article id', () => {
+  test("GET: 200 - should return an empty array if there are no comments associated with the given article id", () => {
     return request(app)
-    .get("/api/articles/2/comments")
-    .expect(200)
-    .then(({body}) => {
-      const comments = body.comments
-      expect(comments).toEqual([])
-    })
-  })
+      .get("/api/articles/2/comments")
+      .expect(200)
+      .then(({ body }) => {
+        const comments = body.comments;
+        expect(comments).toEqual([]);
+      });
+  });
   test("GET: 404 - should return an error message when given a valid but non-existent article id", () => {
     return request(app)
       .get("/api/articles/999/comments")
@@ -242,15 +284,15 @@ describe("/api/articles/:article_id/comments", () => {
     const comment = {
       username: "Gurtaj",
       body: "Oh, I've got compassion running out of my nose, pal! I'm the Sultan of Sentiment!",
-    }
+    };
     return request(app)
-    .post("/api/articles/2/comments")
-    .send(comment)
-    .expect(404)
-    .then(({body}) => {
-      expect(body.message).toBe("Not found")
-    })
-  })
+      .post("/api/articles/2/comments")
+      .send(comment)
+      .expect(404)
+      .then(({ body }) => {
+        expect(body.message).toBe("Not found");
+      });
+  });
   test("POST: 404 - should return an error message when client posts a comment to a non-existent article", () => {
     const comment = {
       username: "Gurtajs",
@@ -335,18 +377,18 @@ describe("/api/articles/:article_id", () => {
         expect(body.message).toBe("Not found");
       });
   });
-  test('PATCH: 400 - should return an error message when we pass in an invalid article_id', () => {
+  test("PATCH: 400 - should return an error message when we pass in an invalid article_id", () => {
     const votes = {
       inc_votes: -100,
     };
     return request(app)
-    .patch("/api/articles/invalid")
-    .send(votes)
-    .expect(400)
-    .then(({body}) => {
-      expect(body.message).toBe("Bad request")
-    })
-  })
+      .patch("/api/articles/invalid")
+      .send(votes)
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.message).toBe("Bad request");
+      });
+  });
 });
 
 describe("/api/comments/:comment_id", () => {
@@ -419,24 +461,170 @@ describe("/api/articles?topic=cats", () => {
   });
 });
 
-describe("/api/articles/:article_id", () => {
-  test("should return an article object by article_id which should also include comment_count", () => {
+describe("/api/users/:username", () => {
+  test("GET: 200 - should return a user object when given a username", () => {
     return request(app)
-      .get("/api/articles/1")
+      .get("/api/users/butter_bridge")
       .expect(200)
       .then(({ body }) => {
-        expect(body.article).toEqual({
-          article_id: 1,
-          title: "Living in the shadow of a great man",
-          topic: "mitch",
-          author: "butter_bridge",
-          body: "I find this existence challenging",
-          created_at: "2020-07-09T21:11:00.000Z",
-          votes: 100,
-          article_img_url:
-            "https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700",
-          comment_count: 11,
+        const username = body.username;
+        expect(username).toEqual({
+          username: "butter_bridge",
+          name: "jonny",
+          avatar_url:
+            "https://www.healthytherapies.com/wp-content/uploads/2016/06/Lime3.jpg",
         });
       });
   });
+  test("GET: 404 - should return an error message when given a valid non-existent username", () => {
+    return request(app)
+      .get("/api/users/gurtaj")
+      .expect(404)
+      .then(({ body }) => {
+        expect(body.message).toEqual("Not found");
+      });
+  });
+  test("GET: 400 - should return an error message when given an invalid username", () => {
+    return request(app)
+      .get("/api/users/123")
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.message).toEqual("Bad request");
+      });
+  });
 });
+
+describe("/api/comments/:comment_id", () => {
+  test("PATCH: 200 - should respond with the updated comment when votes is incremented by 1", () => {
+    const updatedData = { inc_votes: 1 };
+    return request(app)
+      .patch("/api/comments/1")
+      .send(updatedData)
+      .expect(200)
+      .then(({ body }) => {
+        const comment = body.comment;
+        expect(comment).toMatchObject({
+          comment_id: 1,
+          body: "Oh, I've got compassion running out of my nose, pal! I'm the Sultan of Sentiment!",
+          votes: 17,
+          author: "butter_bridge",
+          article_id: 9,
+        });
+        expect(typeof comment.created_at).toBe("string");
+      });
+  });
+  test("PATCH: 200 - should respond with the updated comment when votes is decremented by 1", () => {
+    const updatedData = { inc_votes: -100 };
+    return request(app)
+      .patch("/api/comments/1")
+      .send(updatedData)
+      .expect(200)
+      .then(({ body }) => {
+        const comment = body.comment;
+        expect(comment).toMatchObject({
+          comment_id: 1,
+          body: "Oh, I've got compassion running out of my nose, pal! I'm the Sultan of Sentiment!",
+          votes: -84,
+          author: "butter_bridge",
+          article_id: 9,
+        });
+        expect(typeof comment.created_at).toBe("string");
+      });
+  });
+  test("PATCH: 400 - should return an error message when we patch a property in the article other than vote", () => {
+    const age = {
+      age: 25,
+    };
+    return request(app)
+      .patch("/api/comments/1")
+      .send(age)
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.message).toBe("Bad request: property not modifiable");
+      });
+  });
+  test("PATCH: 404 - should return an error message when we patch an article that does not exist", () => {
+    const votes = {
+      inc_votes: -100,
+    };
+    return request(app)
+      .patch("/api/comments/999")
+      .send(votes)
+      .expect(404)
+      .then(({ body }) => {
+        expect(body.message).toBe("Not found");
+      });
+  });
+  test("PATCH: 400 - should return an error message when we pass in an invalid article_id", () => {
+    const votes = {
+      inc_votes: -100,
+    };
+    return request(app)
+      .patch("/api/comments/invalid")
+      .send(votes)
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.message).toBe("Bad request");
+      });
+  });
+});
+
+describe('/api/articles', () => {
+  test('POST: 201 - should return the newly posted article', () => {
+    const article = {
+      title: "Ac Milan",
+      topic: "mitch",
+      author: "butter_bridge",
+      body: "7 Champions Leagues",
+    }
+    return request(app)
+    .post('/api/articles')
+    .send(article)
+    .expect(201)
+    .then(({body}) => {
+      const article = body.article
+      console.log(article)
+      expect(article).toMatchObject({
+        title: "Ac Milan",
+        topic: "mitch",
+        author: "butter_bridge",
+        body: "7 Champions Leagues",
+        article_id: 14,
+        votes: 0,
+        comment_count: 0,
+      })
+    })
+  })
+  test('POST: 400 - should return an error message when there is a missing required field in the body', () => {
+    const article = {
+      title: "Ac Milan",
+      author: "butter_bridge",
+      body: "7 Champions Leagues",
+    }
+    return request(app)
+    .post('/api/articles')
+    .send(article)
+    .expect(400)
+    .then(({body}) => {
+      expect(body.message).toEqual('Bad request')
+    })
+  })
+  test('POST 404 - should return an error message when there is a wrong value inputted in the field', () => {
+    const article = {
+      title: "Ac Milan",
+      topic: "milan",
+      author: "butter_bridge",
+      body: "7 Champions Leagues",
+    }
+    return request(app)
+    .post('/api/articles')
+    .send(article)
+    .expect(404)
+    .then(({body}) => {
+      expect(body.message).toEqual('Not found')
+    })
+  })
+  
+  })
+
+

@@ -2,6 +2,7 @@ const {
   getCommentsData,
   postCommentData,
   deleteCommentData,
+  patchCommentData
 } = require("../models/comments-models");
 
 function getComments(req, res, next) {
@@ -32,4 +33,12 @@ function deleteComment(req, res, next) {
     .catch(next);
 }
 
-module.exports = { getComments, postComment, deleteComment };
+function patchComment(req, res, next) {
+  const {comment_id} = req.params
+  const {inc_votes} = req.body
+  patchCommentData(comment_id, inc_votes).then((comment) => {
+    res.status(200).send({comment})
+  }).catch(next)
+}
+
+module.exports = { getComments, postComment, deleteComment, patchComment };

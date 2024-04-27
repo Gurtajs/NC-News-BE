@@ -1,4 +1,4 @@
-const {getUsersData} = require("../models/users-models")
+const {getUsersData, getUserData} = require("../models/users-models")
 
 function getUsers(req, res, next) {
     getUsersData().then((users) => {
@@ -6,6 +6,12 @@ function getUsers(req, res, next) {
     }).catch(next)
 }
 
+function getUser(req, res, next) {
+    const {username} = req.params
+    getUserData(username).then((username) => {
+        res.status(200).send({username})
+    }).catch(next)
+}
 
 
-module.exports = {getUsers}
+module.exports = {getUsers, getUser}

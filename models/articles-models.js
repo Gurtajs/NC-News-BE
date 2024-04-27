@@ -15,7 +15,12 @@ function getArticleData(article_id) {
     });
 }
 
-function getAllArticlesByTopic(topic, sort_by = "created_at", order = "desc") {
+function getAllArticlesByTopic(topic, sort_by = "created_at", order_by = "desc") {
+  const validSortBys = ["author", "title", "article_id", "topic", "created_at", "votes", "article_img_url", "comment_count"]
+  const validOrderBys = ["asc", "desc"]
+  if (!validSortBys.includes(sort_by) || !validOrderBys.includes(order_by)) {
+    return Promise.reject({status: 400, message: "Bad request"})
+  }
   if (/\d/.test(topic)) {
     return Promise.reject({
       status:400,
@@ -24,7 +29,7 @@ function getAllArticlesByTopic(topic, sort_by = "created_at", order = "desc") {
   }
   return db
     .query(
-      `SELECT articles.author, articles.title, articles.article_id, articles.topic, articles.created_at, articles.votes, articles.article_img_url, COUNT(comments.article_id)::INT AS comment_count FROM articles LEFT JOIN comments ON comments.article_id = articles.article_id WHERE topic = $1 GROUP BY articles.article_id ORDER BY ${sort_by} ${order}`,
+      `SELECT articles.author, articles.title, articles.article_id, articles.topic, articles.created_at, articles.votes, articles.article_img_url, COUNT(comments.article_id)::INT AS comment_count FROM articles LEFT JOIN comments ON comments.article_id = articles.article_id WHERE topic = $1 GROUP BY articles.article_id ORDER BY ${sort_by} ${order_by}`,
       [topic]
     )
     .then((articles) => {
@@ -40,10 +45,15 @@ function getAllArticlesByTopic(topic, sort_by = "created_at", order = "desc") {
     });
 }
 
-function getAllArticlesData(sort_by = "created_at", order = "desc") {
+function getAllArticlesData(sort_by = "created_at", order_by = "desc") {
+  const validSortBys = ["author", "title", "article_id", "topic", "created_at", "votes", "article_img_url", "comment_count"]
+  const validOrderBys = ["asc", "desc"]
+  if (!validSortBys.includes(sort_by) || !validOrderBys.includes(order_by)) {
+    return Promise.reject({status: 400, message: "Bad request"})
+  }
   return db
     .query(
-      `SELECT articles.author, articles.title, articles.article_id, articles.topic, articles.created_at, articles.votes, articles.article_img_url, COUNT(comments.article_id)::INT AS comment_count FROM articles LEFT JOIN comments ON comments.article_id = articles.article_id GROUP BY articles.article_id ORDER BY ${sort_by} ${order}`
+      `SELECT articles.author, articles.title, articles.article_id, articles.topic, articles.created_at, articles.votes, articles.article_img_url, COUNT(comments.article_id)::INT AS comment_count FROM articles LEFT JOIN comments ON comments.article_id = articles.article_id GROUP BY articles.article_id ORDER BY ${sort_by} ${order_by}`
     )
     .then((result) => {
       return result.rows;
@@ -70,9 +80,28 @@ function patchArticleData(article_id, inc_votes) {
     });
 }
 
+function postArticleData(article) {
+  const {title, topic, author, body} = article
+  
+  if (!title | !topic | !author | !body) {
+    return Promise.reject({status:400, message:"Bad request"})
+  }
+
+  
+  return db.query(
+    `INSERT INTO articles (title, topic, author, body)
+     VALUES ($1, $2, $3, $4)
+     RETURNING *, (SELECT COUNT(comments.article_id) FROM comments WHERE comments.article_id = articles.article_id)::INT AS comment_count `,
+    [title, topic, author, body]
+  ).then((article) => {
+    return article.rows[0]
+  })
+}
+
 module.exports = {
   getArticleData,
   getAllArticlesData,
   patchArticleData,
   getAllArticlesByTopic,
+  postArticleData
 };
