@@ -105,6 +105,7 @@ describe("/api/articles", () => {
       .get("/api/articles")
       .expect(200)
       .then(({ body }) => {
+        console.log(body)
         const articles = body.articles;
         expect(articles.length).toBe(13);
 
@@ -624,7 +625,18 @@ describe('/api/articles', () => {
       expect(body.message).toEqual('Not found')
     })
   })
-  
   })
 
+// describe('GET /api/articles?page=2&limit=10', () => {
+//   test('should return the second page containing 10 items', () => {
+//     return request(app)
+//     .get('/api/articles?page=2&limit=5')
+//     .expect(200)
+//     .then(({body}) => {
+//       const articles = body.articles
+//       console.log(articles)
+//       expect(articles.length).toEqual(5)
+//     })
+//   })
+// })
 

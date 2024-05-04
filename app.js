@@ -11,10 +11,12 @@ const {
   postComment,
   deleteComment,
 } = require("./controllers/comments-controller");
-
+const cors = require('cors')
 const {getUsers} = require("./controllers/users-controller")
 
+app.use(cors())
 app.use(express.json());
+
 
 // app.get("/api/topics", getTopics);
 
