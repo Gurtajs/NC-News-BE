@@ -1,5 +1,5 @@
 const db = require("../db/connection");
-const { articleData } = require("../db/data/test-data");
+const { articleData } = require("../db/data/development-data");
 
 function getCommentsData(article_id, sort_by = "created_at", order = "desc") {
   if (article_id > articleData.length) {
