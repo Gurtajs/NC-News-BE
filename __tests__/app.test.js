@@ -19,7 +19,7 @@ describe("/api/topics", () => {
       .get("/api/topics")
       .expect(200)
       .then(({ body }) => {
-        const topics = body.topics.rows;
+        const topics = body.topics;
         expect(topics.length).toBe(3);
         topics.forEach((topic) => {
           expect(typeof topic.slug).toBe("string");
