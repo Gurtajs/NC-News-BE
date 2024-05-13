@@ -13,7 +13,7 @@ The project is a backend news API with endpoints on articles, comments, topics a
 4. There are two test files, one to test the util functions and the other to test the app endpoints. Supertest is used to test our endpoints with: npm test.
 
 # Env files
-Create two .env files, both for the development and test databases. Inside each file set PGDATABASE = <name of database>. Finally, add these two files to .gitignore so that the databsase names and other secret information is not exposed.
+Create two .env files, both for the development and test databases. Inside each file set PGDATABASE = "name of database". Finally, add these two files to .gitignore so that the databsase names and other secret information is not exposed.
 
 # Minimum versions needed
 This project was built with Node.js v18.6.0 and Postgres 15.6.
