@@ -3,7 +3,7 @@
 # Introduction
 Created a backend news API with different endpoints which is available to view on https://news-project-1.onrender.com/api.
 
-# Summary 
+# Overview 
 The project is a backend news API that has endpoints that we can access to view the data for a given endpoint. This API will feed the front end, providing it with the information contained in the API.
 
 # Set up instructions
