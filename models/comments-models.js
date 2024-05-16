@@ -2,7 +2,7 @@ const db = require("../db/connection");
 const { articleData } = require("../db/data/development-data");
 
 function getCommentsData(article_id, sort_by = "created_at", order = "desc") {
-  if (article_id > articleData.length) {
+  if (articleData.length+1<article_id) {
     return Promise.reject({ status: 404, message: "Article not found" });
   }
   return db
