@@ -95,6 +95,19 @@ function postArticleData(article) {
   })
 }
 
+function deleteArticleData(article_id) {
+ 
+  return db.query("DELETE FROM comments WHERE article_id=$1 RETURNING *", [article_id]).then(() => {
+    return db.query(
+      "DELETE FROM articles WHERE article_id=$1 RETURNING *", [article_id]
+    ).then((article) => {
+      if (article.rows.length === 0) {
+        return Promise.reject({status: 400, message: "Article not found"})
+      }
+    })
+  })
+  
+}
 
 module.exports = {
   getArticleData,
@@ -102,4 +115,5 @@ module.exports = {
   patchArticleData,
   getAllArticlesByTopic,
   postArticleData,
+  deleteArticleData
 };

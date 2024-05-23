@@ -1,4 +1,4 @@
-const { getArticleData, getAllArticlesData, patchArticleData, getAllArticlesByTopic, postArticleData, paginationArticles } = require("../models/articles-models");
+const { getArticleData, getAllArticlesData, patchArticleData, getAllArticlesByTopic, postArticleData, paginationArticles, deleteArticleData } = require("../models/articles-models");
 
 function getArticle(req, res, next) {
   const { article_id } = req.params;
@@ -38,5 +38,12 @@ function postArticle(req, res, next) {
   }).catch(next)
 }
 
+function deleteArticle(req, res, next) {
+  const {article_id} = req.params
+  deleteArticleData(article_id).then(() => 
+  {
+    res.sendStatus(204)
+  }).catch(next)
+}
 
-module.exports = { getArticle, getAllArticles, patchArticle, postArticle};
+module.exports = { getArticle, getAllArticles, patchArticle, postArticle, deleteArticle};

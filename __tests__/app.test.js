@@ -105,7 +105,6 @@ describe("/api/articles", () => {
       .get("/api/articles")
       .expect(200)
       .then(({ body }) => {
-        console.log(body)
         const articles = body.articles;
         expect(articles.length).toBe(13);
 
@@ -584,7 +583,6 @@ describe('/api/articles', () => {
     .expect(201)
     .then(({body}) => {
       const article = body.article
-      console.log(article)
       expect(article).toMatchObject({
         title: "Ac Milan",
         topic: "mitch",
@@ -639,4 +637,24 @@ describe('/api/articles', () => {
 //     })
 //   })
 // })
+
+describe('/api/articles/:article_id', () => {
+  test('DELETE: 204 - should delete an article by article_id', () => {
+    return request(app).delete("/api/articles/1").expect(204)
+  })
+  test('DELETE: 404 - should return a message when we are trying to delete an article with a valid but non-existent id', () => {
+    return request(app).delete("/api/articles/999").expect(400).then(({body}) => {
+      expect(body.message).toBe("Article not found")
+    })
+  })
+  test("DELETE 400 - should return an error message when we attempt to delete an article with an invalid id", () => {
+    return request(app)
+      .delete("/api/comments/invalid")
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.message).toBe("Bad request");
+      });
+  });
+})
+
 
